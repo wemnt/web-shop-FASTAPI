@@ -18,9 +18,8 @@ dependencies = [
 [project.scripts]
 web-shop-fastapi = "web_shop_fastapi:main"
 
-[build-system]
-requires = ["uv_build>=0.12.16,<0.13.0"]
-build-backend = "uv_build"
+[tool.uv]
+package = false
 
 [dependency-groups]
 dev = [

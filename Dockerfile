@@ -50,4 +50,4 @@ USER nonroot
 # Uses `fastapi dev` to enable hot-reloading when the `watch` sync occurs
 # Uses `--host 0.0.0.0` to allow access from outside the container
 # Note in production, you should use `fastapi run` instead
-CMD ["uv", "run", "fastapi", "dev", "--host", "0.0.0.0", "src/web_shop_fastapi/main.py"]
+CMD ["uv", "run", "fastapi", "dev", "--host", "0.0.0.0", "src/app.py"]
