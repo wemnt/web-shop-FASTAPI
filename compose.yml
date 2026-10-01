@@ -3,6 +3,10 @@ services:
     # Build the image from the Dockerfile in the current directory
     build: .
 
+    volumes:
+      - ./migrations:/app/migrations
+      - ./alembic.ini:/app/alembic.ini
+
     # Host the FastAPI application on port 8000
     ports:
       - "8000:8000"
@@ -37,10 +41,7 @@ services:
         condition: service_healthy
   db:
     image: postgres:18
-    environment:
-      POSTGRES_USER: shop
-      POSTGRES_PASSWORD: 5879
-      POSTGRES_DB: shop
+    env_file: .env
     volumes:
       - pgdata:/var/lib/postgresql
     healthcheck:

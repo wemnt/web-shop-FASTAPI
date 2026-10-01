@@ -1,1 +1,1 @@
-"initialized v1 api routers"
+"""api routers"""
