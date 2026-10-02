@@ -11,7 +11,7 @@ from services.exceptions import UserAlreadyExistsError
 
 async def create_user(session: AsyncSession, data: UserCreate) -> User:
     existing = await session.scalar(select(User).where(User.email == data.email))
-    if existing:
+    if existing is not None:
         raise UserAlreadyExistsError("Email already exists")
 
     hashed = await run_in_threadpool(hash_password, data.password)

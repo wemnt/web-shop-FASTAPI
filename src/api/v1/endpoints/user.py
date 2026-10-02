@@ -9,7 +9,7 @@ from schemas.user import UserCreate, UserRead
 from services.exceptions import UserAlreadyExistsError
 from services.user import create_user
 
-router = APIRouter(prefix="/users", tags=["users"])
+router = APIRouter(prefix="/user", tags=["user"])
 
 
 SessionDep = Annotated[AsyncSession, Depends(get_session)]
