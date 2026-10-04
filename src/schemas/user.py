@@ -22,3 +22,10 @@ class UserRead(BaseModel):
     name: str
     date_birth: date | None = None
     mobile_number: PhoneNumber | None = None
+
+
+class UserUpdate(BaseModel):
+    email: EmailStr
+    name: str = Field(max_length=32)
+    date_birth: date | None = None
+    mobile_number: PhoneNumber | None = None
