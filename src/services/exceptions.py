@@ -8,3 +8,7 @@ class UserAlreadyExistsError(AppError):
 
 class UserNotFoundError(AppError):
     pass
+
+
+class IncorrectPasswordError(AppError):
+    pass

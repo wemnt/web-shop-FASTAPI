@@ -1,3 +1,4 @@
+from datetime import UTC, datetime
 from uuid import UUID
 
 from fastapi.concurrency import run_in_threadpool
@@ -5,10 +6,14 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.security import hash_password
+from core.security import hash_password, verify_password
 from models.user import User
-from schemas.user import UserCreate, UserUpdate
-from services.exceptions import UserAlreadyExistsError, UserNotFoundError
+from schemas.user import PasswordChange, UserCreate, UserUpdate
+from services.exceptions import (
+    IncorrectPasswordError,
+    UserAlreadyExistsError,
+    UserNotFoundError,
+)
 
 
 async def create_user(session: AsyncSession, data: UserCreate) -> User:
@@ -58,3 +63,18 @@ async def update_user(session: AsyncSession, user_id: UUID, data: UserUpdate) ->
         await session.rollback()
         raise UserAlreadyExistsError("Email already exists") from None
     return user
+
+
+async def delete_user(session: AsyncSession, user_id: UUID) -> None:
+    user = await get_user(session, user_id)
+    user.deleted_at = datetime.now(tz=UTC)
+    await session.commit()
+
+
+async def update_password(session: AsyncSession, user_id: UUID, data: PasswordChange) -> None:
+    user = await get_user(session, user_id)
+    is_valid = await run_in_threadpool(verify_password, data.current_password, user.hashed_password)
+    if not is_valid:
+        raise IncorrectPasswordError("Incorrect password")
+    user.hashed_password = await run_in_threadpool(hash_password, data.new_password)
+    await session.commit()
