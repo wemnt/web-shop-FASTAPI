@@ -1,17 +1,16 @@
-from datetime import date
+from datetime import date, datetime
 from uuid import UUID
 
-from pydantic import BaseModel, EmailStr, Field
-from pydantic.config import ConfigDict
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, PastDate, field_validator
 from pydantic_extra_types.phone_numbers import PhoneNumber
 
 
 class UserCreate(BaseModel):
     email: EmailStr
-    name: str = Field(max_length=32)
-    date_birth: date | None = None
+    name: str = Field(min_length=2, max_length=32)
+    date_birth: PastDate | None = None
     mobile_number: PhoneNumber | None = None
-    password: str = Field(min_length=8)
+    password: str = Field(min_length=8, max_length=32, pattern=r"^\S+$")
 
 
 class UserRead(BaseModel):
@@ -22,10 +21,24 @@ class UserRead(BaseModel):
     name: str
     date_birth: date | None = None
     mobile_number: PhoneNumber | None = None
+    created_at: datetime
+    updated_at: datetime
 
 
 class UserUpdate(BaseModel):
-    email: EmailStr
-    name: str = Field(max_length=32)
-    date_birth: date | None = None
+    email: EmailStr | None = None
+    name: str | None = Field(None, min_length=2, max_length=32)
+    date_birth: PastDate | None = None
     mobile_number: PhoneNumber | None = None
+
+    @field_validator("email", "name")
+    @classmethod
+    def not_null(cls, value: str | None) -> str:
+        if value is None:
+            raise ValueError("Field cannot be null")
+        return value
+
+
+class PasswordChange(BaseModel):
+    current_password: str
+    new_password: str = Field(min_length=8, max_length=32, pattern=r"^\S+$")
