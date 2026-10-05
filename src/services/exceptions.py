@@ -4,3 +4,7 @@ class AppError(Exception):
 
 class UserAlreadyExistsError(AppError):
     pass
+
+
+class UserNotFoundError(AppError):
+    pass
