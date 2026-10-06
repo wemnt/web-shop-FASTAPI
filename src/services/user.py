@@ -71,9 +71,13 @@ async def delete_user(session: AsyncSession, user_id: UUID) -> None:
     await session.commit()
 
 
-async def update_password(session: AsyncSession, user_id: UUID, data: PasswordChange) -> None:
+async def update_password(
+    session: AsyncSession, user_id: UUID, data: PasswordChange
+) -> None:
     user = await get_user(session, user_id)
-    is_valid = await run_in_threadpool(verify_password, data.current_password, user.hashed_password)
+    is_valid = await run_in_threadpool(
+        verify_password, data.current_password, user.hashed_password
+    )
     if not is_valid:
         raise IncorrectPasswordError("Incorrect password")
     user.hashed_password = await run_in_threadpool(hash_password, data.new_password)

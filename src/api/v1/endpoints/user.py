@@ -1,10 +1,8 @@
-from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter, HTTPException, status
 
-from db.session import get_session
+from db.session import SessionDep
 from models.user import User
 from schemas.user import PasswordChange, UserCreate, UserRead, UserUpdate
 from services.exceptions import (
@@ -20,10 +18,7 @@ from services.user import (
     update_user,
 )
 
-router = APIRouter(prefix="/user", tags=["user"])
-
-
-SessionDep = Annotated[AsyncSession, Depends(get_session)]
+router = APIRouter(prefix="/users", tags=["users"])
 
 
 @router.post("", response_model=UserRead, status_code=status.HTTP_201_CREATED)

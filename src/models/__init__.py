@@ -4,4 +4,4 @@ from db.base import Base
 from models.product import Product
 from models.user import User
 
-__all__ = ["Base", "User", "Product"]
+__all__ = ["Base", "Product", "User"]

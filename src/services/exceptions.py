@@ -12,3 +12,7 @@ class UserNotFoundError(AppError):
 
 class IncorrectPasswordError(AppError):
     pass
+
+
+class ProductNotFoundError(AppError):
+    pass

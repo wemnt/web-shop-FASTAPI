@@ -22,6 +22,7 @@ class ProductRead(BaseModel):
     stock: int
     is_active: bool
     created_at: datetime
+    updated_at: datetime
 
 
 class ProductUpdate(BaseModel):
