@@ -2,17 +2,29 @@ class AppError(Exception):
     pass
 
 
-class UserAlreadyExistsError(AppError):
+class NotFoundError(AppError):
     pass
 
 
-class UserNotFoundError(AppError):
+class AlreadyExistsError(AppError):
     pass
 
 
-class IncorrectPasswordError(AppError):
+class BadRequestError(AppError):
     pass
 
 
-class ProductNotFoundError(AppError):
+class UserAlreadyExistsError(AlreadyExistsError):
+    pass
+
+
+class UserNotFoundError(NotFoundError):
+    pass
+
+
+class IncorrectPasswordError(BadRequestError):
+    pass
+
+
+class ProductNotFoundError(NotFoundError):
     pass

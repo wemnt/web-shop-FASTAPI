@@ -1,12 +1,11 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import APIRouter, Query, status
 
 from db.session import SessionDep
 from models.product import Product
 from schemas.product import ProductCreate, ProductRead, ProductUpdate
-from services.exceptions import ProductNotFoundError
 from services.product import (
     create_product,
     delete_product,
@@ -26,13 +25,7 @@ async def create_product_endpoint(data: ProductCreate, session: SessionDep) -> P
 
 @router.get("/{product_id}", response_model=ProductRead)
 async def get_product_endpoint(product_id: UUID, session: SessionDep) -> Product:
-    try:
-        product = await get_product(product_id=product_id, session=session)
-        return product
-    except ProductNotFoundError as e:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Product not found"
-        ) from e
+    return await get_product(product_id=product_id, session=session)
 
 
 @router.get("", response_model=list[ProductRead])
@@ -48,22 +41,11 @@ async def get_products(
 async def update_product_endpoint(
     product_id: UUID, data: ProductUpdate, session: SessionDep
 ) -> Product:
-    try:
-        product = await update_product(
-            product_id=product_id, data=data, session=session
-        )
-        return product
-    except ProductNotFoundError as e:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Product not found"
-        ) from e
+    return await update_product(
+        product_id=product_id, data=data, session=session
+    )
 
 
 @router.delete("/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_product_endpoint(product_id: UUID, session: SessionDep) -> None:
-    try:
-        await delete_product(product_id=product_id, session=session)
-    except ProductNotFoundError as e:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Product not found"
-        ) from e
+    await delete_product(product_id=product_id, session=session)
