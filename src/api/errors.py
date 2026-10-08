@@ -1,4 +1,5 @@
 import logging
+from collections.abc import Mapping
 
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
@@ -28,7 +29,7 @@ def error_response(
     status_code: int,
     message: str,
     detail: list[FieldError] | None = None,
-    headers: dict[str, str] | None = None,
+    headers: Mapping[str, str] | None = None,
 ) -> JSONResponse:
     body = ErrorResponse(message=message, detail=detail)
     return JSONResponse(
@@ -75,11 +76,11 @@ async def unhandled_error_handler(request: Request, exc: Exception) -> JSONRespo
 async def http_exception_handler(
     request: Request, exc: StarletteHTTPException
 ) -> JSONResponse:
-    return error_response(exc.status_code, str(exc.detail))
+    return error_response(exc.status_code, str(exc.detail), headers=exc.headers)
 
 
 def register_exception_handlers(app: FastAPI) -> None:
-    app.add_exception_handler(AppError, app_error_handler)  # type: ignore[arg-type]
-    app.add_exception_handler(RequestValidationError, validation_error_handler)  # type: ignore[arg-type]
-    app.add_exception_handler(StarletteHTTPException, http_exception_handler)  # type: ignore[arg-type]
+    app.add_exception_handler(AppError, app_error_handler)  # pyright: ignore[reportArgumentType]
+    app.add_exception_handler(RequestValidationError, validation_error_handler)  # pyright: ignore[reportArgumentType]
+    app.add_exception_handler(StarletteHTTPException, http_exception_handler)  # pyright: ignore[reportArgumentType]
     app.add_exception_handler(Exception, unhandled_error_handler)
