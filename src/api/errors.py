@@ -11,27 +11,35 @@ from services.exceptions import (
     AppError,
     BadRequestError,
     NotFoundError,
+    UnauthorizedError,
 )
 
 ERROR_STATUS: dict[type[AppError], int] = {
     NotFoundError: status.HTTP_404_NOT_FOUND,
     AlreadyExistsError: status.HTTP_409_CONFLICT,
     BadRequestError: status.HTTP_400_BAD_REQUEST,
+    UnauthorizedError: status.HTTP_401_UNAUTHORIZED,
 }
 
 logger = logging.getLogger(__name__)
 
 
 def error_response(
-    status_code: int, message: str, detail: list[FieldError] | None = None
+    status_code: int,
+    message: str,
+    detail: list[FieldError] | None = None,
+    headers: dict[str, str] | None = None,
 ) -> JSONResponse:
     body = ErrorResponse(message=message, detail=detail)
-    return JSONResponse(status_code=status_code, content=body.model_dump())
+    return JSONResponse(
+        status_code=status_code, content=body.model_dump(), headers=headers
+    )
 
 
 async def app_error_handler(request: Request, exc: AppError) -> JSONResponse:
     status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
     message = str(exc)
+    headers = None
     for exc_type, code in ERROR_STATUS.items():
         if isinstance(exc, exc_type):
             status_code = code
@@ -39,7 +47,9 @@ async def app_error_handler(request: Request, exc: AppError) -> JSONResponse:
     else:
         logger.error("Unmapped AppError: %r", exc)
         message = "Internal server error"
-    return error_response(status_code, message)
+    if isinstance(exc, UnauthorizedError):
+        headers = {"WWW-Authenticate": "Bearer"}
+    return error_response(status_code, message, headers=headers)
 
 
 async def validation_error_handler(
@@ -69,7 +79,7 @@ async def http_exception_handler(
 
 
 def register_exception_handlers(app: FastAPI) -> None:
-    app.add_exception_handler(AppError, app_error_handler) # type: ignore[arg-type]
-    app.add_exception_handler(RequestValidationError, validation_error_handler) # type: ignore[arg-type]
-    app.add_exception_handler(StarletteHTTPException, http_exception_handler) # type: ignore[arg-type]
+    app.add_exception_handler(AppError, app_error_handler)  # type: ignore[arg-type]
+    app.add_exception_handler(RequestValidationError, validation_error_handler)  # type: ignore[arg-type]
+    app.add_exception_handler(StarletteHTTPException, http_exception_handler)  # type: ignore[arg-type]
     app.add_exception_handler(Exception, unhandled_error_handler)

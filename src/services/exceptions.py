@@ -14,6 +14,10 @@ class BadRequestError(AppError):
     pass
 
 
+class UnauthorizedError(AppError):
+    pass
+
+
 class UserAlreadyExistsError(AlreadyExistsError):
     pass
 
@@ -27,4 +31,11 @@ class IncorrectPasswordError(BadRequestError):
 
 
 class ProductNotFoundError(NotFoundError):
+    pass
+
+
+class AuthTokenError(UnauthorizedError):
+    pass
+
+class InvalidCredentialsError(UnauthorizedError):
     pass
