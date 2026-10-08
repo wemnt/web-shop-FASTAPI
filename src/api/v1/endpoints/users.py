@@ -1,10 +1,13 @@
+from uuid import UUID
+
 from fastapi import APIRouter, status
 
-from api.deps import CurrentUserDep
+from api.deps import AdminUserDep, CurrentUserDep
 from db.session import SessionDep
 from models.user import User
-from schemas.user import PasswordChange, UserCreate, UserRead, UserUpdate
+from schemas.user import PasswordChange, RoleUpdate, UserCreate, UserRead, UserUpdate
 from services.user import (
+    change_user_role,
     create_user,
     delete_user,
     update_password,
@@ -59,3 +62,13 @@ async def update_user_password(
     session: SessionDep,
 ) -> None:
     await update_password(session=session, user_id=user.id, data=data)
+
+
+@router.patch("/{user_id}/role", response_model=UserRead)
+async def change_user_role_by_id(
+    user_id: UUID, data: RoleUpdate, session: SessionDep, admin: AdminUserDep
+) -> User:
+
+    return await change_user_role(
+        session=session, user_id=user_id, actor_id=admin.id, role=data.role
+    )

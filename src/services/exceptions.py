@@ -37,5 +37,18 @@ class ProductNotFoundError(NotFoundError):
 class AuthTokenError(UnauthorizedError):
     pass
 
+
 class InvalidCredentialsError(UnauthorizedError):
+    pass
+
+
+class ForbiddenError(AppError):
+    pass
+
+
+class InsufficientRoleError(ForbiddenError):
+    pass
+
+
+class CannotChangeOwnRoleError(BadRequestError):
     pass

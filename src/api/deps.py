@@ -5,8 +5,8 @@ from fastapi.security import OAuth2PasswordBearer
 
 from core.security import decode_access_token
 from db.session import SessionDep
-from models.user import User
-from services.exceptions import AuthTokenError, UserNotFoundError
+from models.user import User, UserRole
+from services.exceptions import AuthTokenError, InsufficientRoleError, UserNotFoundError
 from services.user import get_user
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
@@ -23,3 +23,16 @@ async def get_current_user(
 
 
 CurrentUserDep = Annotated[User, Depends(get_current_user)]
+
+
+def require_roles(*roles: UserRole):
+    async def dependency(user: CurrentUserDep) -> User:
+        if user.role not in roles:
+            raise InsufficientRoleError("Operation not permitted")
+        return user
+
+    return dependency
+
+
+require_admin = require_roles(UserRole.ADMIN)
+AdminUserDep = Annotated[User, Depends(require_admin)]

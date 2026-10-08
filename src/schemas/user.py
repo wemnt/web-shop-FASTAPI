@@ -4,6 +4,8 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, PastDate, field_validator
 from pydantic_extra_types.phone_numbers import PhoneNumber
 
+from models.user import UserRole
+
 
 class UserCreate(BaseModel):
     email: EmailStr
@@ -20,6 +22,7 @@ class UserRead(BaseModel):
     email: EmailStr
     name: str
     date_birth: date | None = None
+    role: str
     mobile_number: PhoneNumber | None = None
     created_at: datetime
     updated_at: datetime
@@ -42,3 +45,7 @@ class UserUpdate(BaseModel):
 class PasswordChange(BaseModel):
     current_password: str
     new_password: str = Field(min_length=8, max_length=32, pattern=r"^\S+$")
+
+
+class RoleUpdate(BaseModel):
+    role: UserRole

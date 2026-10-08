@@ -7,9 +7,10 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.security import hash_password, verify_password
-from models.user import User
+from models.user import User, UserRole
 from schemas.user import PasswordChange, UserCreate, UserUpdate
 from services.exceptions import (
+    CannotChangeOwnRoleError,
     IncorrectPasswordError,
     UserAlreadyExistsError,
     UserNotFoundError,
@@ -82,3 +83,14 @@ async def update_password(
         raise IncorrectPasswordError("Incorrect password")
     user.hashed_password = await run_in_threadpool(hash_password, data.new_password)
     await session.commit()
+
+
+async def change_user_role(
+    session: AsyncSession, user_id: UUID, actor_id: UUID, role: UserRole
+) -> User:
+    if user_id == actor_id:
+        raise CannotChangeOwnRoleError("Cannot change your own role")
+    user = await get_user(session, user_id)
+    user.role = role
+    await session.commit()
+    return user

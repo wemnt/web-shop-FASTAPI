@@ -1,8 +1,9 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Query, status
+from fastapi import APIRouter, Depends, Query, status
 
+from api.deps import require_admin
 from db.session import SessionDep
 from models.product import Product
 from schemas.product import ProductCreate, ProductRead, ProductUpdate
@@ -17,7 +18,12 @@ from services.product import (
 router = APIRouter(prefix="/products", tags=["products"])
 
 
-@router.post("", response_model=ProductRead, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "",
+    response_model=ProductRead,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(require_admin)],
+)
 async def create_product_endpoint(data: ProductCreate, session: SessionDep) -> Product:
     product = await create_product(data=data, session=session)
     return product
@@ -37,15 +43,19 @@ async def get_products(
     return await list_products(session, page=page, size=size)
 
 
-@router.patch("/{product_id}", response_model=ProductRead)
+@router.patch(
+    "/{product_id}", response_model=ProductRead, dependencies=[Depends(require_admin)]
+)
 async def update_product_endpoint(
     product_id: UUID, data: ProductUpdate, session: SessionDep
 ) -> Product:
-    return await update_product(
-        product_id=product_id, data=data, session=session
-    )
+    return await update_product(product_id=product_id, data=data, session=session)
 
 
-@router.delete("/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/{product_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(require_admin)],
+)
 async def delete_product_endpoint(product_id: UUID, session: SessionDep) -> None:
     await delete_product(product_id=product_id, session=session)

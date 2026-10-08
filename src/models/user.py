@@ -1,10 +1,16 @@
 import uuid
 from datetime import date, datetime
+from enum import StrEnum
 
-from sqlalchemy import DateTime, String, func, true
+from sqlalchemy import DateTime, Enum, String, func, true
 from sqlalchemy.orm import Mapped, mapped_column
 
 from db.base import Base
+
+
+class UserRole(StrEnum):
+    CUSTOMER = "customer"
+    ADMIN = "admin"
 
 
 class User(Base):
@@ -15,6 +21,18 @@ class User(Base):
     name: Mapped[str] = mapped_column(String(32))
     date_birth: Mapped[date | None] = mapped_column()
     mobile_number: Mapped[str | None] = mapped_column(String(32))
+    role: Mapped[UserRole] = mapped_column(
+        Enum(
+            UserRole,
+            native_enum=False,
+            length=20,
+            values_callable=lambda e: [m.value for m in e],
+            create_constraint=True,
+            name="user_role",
+        ),
+        default=UserRole.CUSTOMER,
+        server_default=UserRole.CUSTOMER.value,
+    )
     hashed_password: Mapped[str] = mapped_column(String(255))
     is_active: Mapped[bool] = mapped_column(default=True, server_default=true())
     created_at: Mapped[datetime] = mapped_column(

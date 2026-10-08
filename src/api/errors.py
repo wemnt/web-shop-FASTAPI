@@ -11,6 +11,7 @@ from services.exceptions import (
     AlreadyExistsError,
     AppError,
     BadRequestError,
+    ForbiddenError,
     NotFoundError,
     UnauthorizedError,
 )
@@ -20,6 +21,7 @@ ERROR_STATUS: dict[type[AppError], int] = {
     AlreadyExistsError: status.HTTP_409_CONFLICT,
     BadRequestError: status.HTTP_400_BAD_REQUEST,
     UnauthorizedError: status.HTTP_401_UNAUTHORIZED,
+    ForbiddenError: status.HTTP_403_FORBIDDEN,
 }
 
 logger = logging.getLogger(__name__)
